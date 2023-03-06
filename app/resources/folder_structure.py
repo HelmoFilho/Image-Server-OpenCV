@@ -1,7 +1,7 @@
 ## -- Importing External Modules -- ##
 from flask import wrappers, abort
+import os, cv2, re, shutil
 import numpy as np
-import os, cv2, re
 
 ## -- Importing Internal Modules -- ##
 from app.config import MAIN_FOLDER
@@ -126,4 +126,53 @@ def folder_structure_post(**kwargs) -> wrappers.Response:
     return {
         "status": True,
         "message": "Image saved",
+    }
+
+
+def folder_structure_delete(**kwargs) -> wrappers.Response:
+    """
+    Saves the image in the predetermined folder
+    """
+
+    if not os.path.exists(MAIN_FOLDER):
+        abort(400, {'message': 'Main Folder does not exist.'})
+
+    request = kwargs.get("request") if isinstance(kwargs.get("request"), dict) else {}
+
+    to_delete = request.get("path")
+
+    if not to_delete:
+
+        for filename in os.listdir(MAIN_FOLDER):
+
+            path = os.path.join(MAIN_FOLDER, filename)
+            
+            if os.path.isfile(path) or os.path.islink(path):
+                os.remove(path)
+
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+
+        return {
+            "status": True,
+            "message": "Subdirectories removed",
+        }
+
+    full_path = f"{MAIN_FOLDER}/{to_delete}"
+
+    if not os.path.exists(full_path):
+        abort(400, {'message': 'Chosen path does not exist.'})
+
+    if os.path.isfile(full_path):
+        os.remove(full_path)
+        return {
+            "status": True,
+            "message": "File removed",
+        }
+
+    shutil.rmtree(full_path)
+
+    return {
+        "status": True,
+        "message": "Directory removed",
     }

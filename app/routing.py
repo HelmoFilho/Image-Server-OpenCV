@@ -4,7 +4,11 @@ from timeit import default_timer as timer
 from functools import wraps
 
 ## -- Importing Internal Modules -- ##
-from app.resources.folder_structure import folder_structure_get, folder_structure_post
+from app.resources.folder_structure import (
+    folder_structure_get, 
+    folder_structure_post, 
+    folder_structure_delete,
+)
 from app.resources.image_serving import image_serving_get
 from app.server import app
 
@@ -177,19 +181,19 @@ def image_service(**kwargs) -> wrappers.Response:
     return image_serving_get(**kwargs)
 
 
-@app.route("/structure", methods = ['GET', "POST"])
+@app.route("/structure", methods = ['GET', "POST", "DELETE"])
 @add_body
 @add_files
 def folder_structure(**kwargs) -> wrappers.Response:
     """
-    Returns a saved image
-
-    kwargs:
-        full_path (str): Path to the image.
+    Works with the structure of folder and files of the api
     """
 
     if request.method.upper() == 'GET':
         return folder_structure_get(**kwargs)
+    
+    if request.method.upper() == 'DELETE':
+        return folder_structure_delete(**kwargs)
     
     else:
         return folder_structure_post(**kwargs)
